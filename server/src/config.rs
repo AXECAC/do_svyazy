@@ -9,7 +9,7 @@ impl Config {
     pub fn from_env() -> Self {
         Self {
             database_url: env::var("DATABASE_URL")
-                .unwrap_or("postgres://postgres:postgres@localhost:5432/interestograph".into()),
+                .unwrap_or("postgres://postgres:postgres@localhost:5432/postgres".into()),
         }
     }
 }
