@@ -32,8 +32,6 @@ async fn handle_register(user: RegisterUser) {
         .json(&user)
         .send()
         .await;
-    println!("{response:?}");
-    web_sys::console::log_1(&"aboba".into());
 
     match response {
         Ok(resp) => {
@@ -49,7 +47,6 @@ async fn handle_register(user: RegisterUser) {
                         set_token.set(Some(token.clone()));
                     });
 
-                    web_sys::console::log_1(&"cookie set".into());
                     // Переходим на домашнюю страницу
                     let navigate = use_navigate();
                     navigate("/", Default::default());
