@@ -10,6 +10,7 @@ use crate::pages::{home::page::HomePage, login::page::LoginPage, register::page:
 
 mod components;
 mod pages;
+mod api;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {

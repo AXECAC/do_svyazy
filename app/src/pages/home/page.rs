@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
 use leptos::prelude::*;
+use leptos::server::codee::string::FromToStringCodec;
 use leptos_router::hooks::use_navigate;
+use leptos_use::use_cookie;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
@@ -14,13 +16,18 @@ pub fn HomePage() -> impl IntoView {
         navigate("/register", Default::default());
     });
 
+    let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
     view! {
-        {
-            Button(ButtonProps {
-                class_name: "".to_string(),
-                children: Children::to_children(|| "Перейти к регистрации"),
-                on_click: Some(go_to_register)
-            })
-        }
+        <div class="home_container">
+            <p> {token.get()} </p>
+            <img class="mascot" src="mascot.png"/>
+            {
+                Button(ButtonProps {
+                    class_name: "".to_string(),
+                    children: Children::to_children(|| "Создать аккаунт"),
+                    on_click: Some(go_to_register)
+                })
+            }
+        </div>
     }
 }

@@ -1,8 +1,12 @@
 use std::rc::Rc;
 
+use http::StatusCode;
 use leptos::ev::MouseEvent;
+use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
 use leptos_router::hooks::use_navigate;
+use leptos_use::{use_cookie, use_cookie_with_options, SameSite, UseCookieOptions};
+use share::RegisterUser;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
@@ -22,6 +26,44 @@ fn navigation() -> (Rc<impl Fn(MouseEvent)>, Rc<impl Fn(MouseEvent)>) {
     )
 }
 
+async fn handle_register(user: RegisterUser) {
+    let response = reqwest::Client::new()
+        .post("http://127.0.0.1:3000/registration")
+        .json(&user)
+        .send()
+        .await;
+    println!("{response:?}");
+    web_sys::console::log_1(&"aboba".into());
+
+    match response {
+        Ok(resp) => {
+            match resp.status() {
+                StatusCode::OK => {
+                    let token: String = resp.json().await.unwrap();
+
+                    let (_token, set_token) = use_cookie_with_options::<String, FromToStringCodec>(
+                        "auth_token",
+                        UseCookieOptions::default().secure(false).path("/"),
+                    );
+                    Effect::new(move |_| {
+                        set_token.set(Some(token.clone()));
+                    });
+
+                    web_sys::console::log_1(&"cookie set".into());
+                    // Переходим на домашнюю страницу
+                    let navigate = use_navigate();
+                    navigate("/", Default::default());
+                }
+                StatusCode::CONFLICT => {}
+                _ => {}
+            }
+        }
+        Err(_) => {
+            println!("Помянем сеть")
+        }
+    }
+}
+
 #[component]
 pub fn RegisterPage() -> impl IntoView {
     let (email, set_email) = signal("".to_string());
@@ -31,9 +73,28 @@ pub fn RegisterPage() -> impl IntoView {
     let (go_home, go_to_login) = navigation();
 
     let input_class = "register_input".to_string();
+    // Обработчик клика на кнопку регистрации
+    let on_register_click = Rc::new({
+        let email = email.clone();
+        let password = password.clone();
+        let phio = phio.clone();
+
+        move |_| {
+            let user = RegisterUser {
+                username: phio.get(),
+                email: email.get(),
+                password: password.get(),
+            };
+            // Запускаем async задачу внутри Leptos
+            wasm_bindgen_futures::spawn_local(async move {
+                handle_register(user).await;
+            });
+        }
+    });
+    let is_success = Rc::new(true);
 
     view! {
-        <form class="register_container">
+        <div class="register_container">
             <h1 class="register_header">"Добро пожаловать"</h1>
             {
                 Input(InputProps{
@@ -69,7 +130,7 @@ pub fn RegisterPage() -> impl IntoView {
                 Button(ButtonProps {
                     class_name: "register_button".to_string(),
                     children: Children::to_children(|| "Зарегестрироваться"),
-                    on_click: None,
+                    on_click: Some(on_register_click),
                 })
             }
 
@@ -89,6 +150,6 @@ pub fn RegisterPage() -> impl IntoView {
                     })
                 }
             </div>
-        </form>
+        </div>
     }
 }

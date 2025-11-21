@@ -10,6 +10,15 @@ body {
 	margin: 0 auto;
 }
 
+.mascot {
+    width: 2.0rem;
+    height: 2.0rem;
+    border-radius: 50%;
+    border: 1px solid #023E8A;
+    object-fit: cover;
+    display: block;
+}
+
 @import "../app/src/components/button/button.module.scss";
 @import "../app/src/components/input/input.module.scss";
 @import "../app/src/pages/home/home.module.scss";
