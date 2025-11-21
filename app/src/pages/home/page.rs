@@ -13,14 +13,11 @@ use crate::components::button::component::ButtonProps;
 pub fn HomePage() -> impl IntoView {
     let navigate = use_navigate();
     let go_to_register = Rc::new(move |_| {
+
         navigate("/register", Default::default());
     });
 
-    let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
-
-    if token.get().is_none() {
-
-    }
+        let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
 
     view! {
         <div class="home_container">
