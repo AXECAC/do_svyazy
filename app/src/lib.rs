@@ -12,6 +12,10 @@ mod components;
 mod pages;
 mod api;
 
+pub fn get_server_url() -> String {
+    std::env::var("SERVER_URL").unwrap_or_else(|_| "http://localhost:8000".to_string())
+}
+
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html>

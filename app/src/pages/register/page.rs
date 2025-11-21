@@ -5,7 +5,7 @@ use leptos::ev::MouseEvent;
 use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
 use leptos_router::hooks::use_navigate;
-use leptos_use::{use_cookie, use_cookie_with_options, SameSite, UseCookieOptions};
+use leptos_use::{use_cookie_with_options, UseCookieOptions};
 use share::RegisterUser;
 
 use crate::components::button::component::Button;

@@ -1,14 +1,9 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct User {
-    pub id: u32,
-    pub username: String,
+pub struct LoginUser{
     pub email: String,
-    pub bio: String,
-    pub password_hash: String,
-    pub create_at: DateTime<Utc>,
+    pub password: String
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
