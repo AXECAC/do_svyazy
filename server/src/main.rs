@@ -10,15 +10,20 @@ use leptos::logging::log;
 use share::RegisterUser;
 use tower_http::cors::{Any, CorsLayer};
 
+mod config;
+
+use crate::config::*;
 #[tokio::main]
 async fn main() {
+    let config = Config::from_env();
+    let db_pool = get_db_pool(&config.database_url).await;
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
-
+    
     let app = Router::new()
         .route("/registration", post(handle_register))
         .leptos_routes(&leptos_options, routes, {
