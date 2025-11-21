@@ -1,9 +1,16 @@
-use leptos::prelude::*;
+use leptos::{html::*, prelude::*};
+
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+
+use crate::pages::{home::page::HomePage, login::page::LoginPage, register::page::RegisterPage};
+
+mod components;
+mod pages;
+mod api;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -39,21 +46,11 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=HomePage/>
+                    <Route path=StaticSegment("login") view=LoginPage/>
+                    <Route path=StaticSegment("register") view=RegisterPage/>
                 </Routes>
             </main>
         </Router>
     }
 }
 
-/// Renders the home page of your application.
-#[component]
-fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let count = RwSignal::new(0);
-    let on_click = move |_| *count.write() += 1;
-
-    view! {
-        <h1>"Welcome to Leptos!"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
-    }
-}
