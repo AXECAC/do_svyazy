@@ -1,9 +1,8 @@
 ---
 name: 'Add something'
-about: Надо добавить на фронт...
+about: Надо добавить...
 title: 'Add:'
 labels: enhancement
-assignees: aragami3070
 type: Feature
 ---
 **Что надо добавить?**
