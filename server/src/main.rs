@@ -23,7 +23,7 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
-    
+
     let app = Router::new()
         .route("/registration", post(handle_register))
         .leptos_routes(&leptos_options, routes, {
@@ -32,6 +32,7 @@ async fn main() {
         })
         .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options)
+        .with_state(db_pool)
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)

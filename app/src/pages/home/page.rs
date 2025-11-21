@@ -17,9 +17,14 @@ pub fn HomePage() -> impl IntoView {
     });
 
     let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
+
+    if token.get().is_none() {
+
+    }
+
     view! {
         <div class="home_container">
-            <p> {token.get()} </p>
+            <p> {move ||token.get()} </p>
             <img class="mascot" src="mascot.png"/>
             {
                 Button(ButtonProps {
