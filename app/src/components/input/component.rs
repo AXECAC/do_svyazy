@@ -5,6 +5,7 @@ pub fn Input(
     class_name: String,
     name: String,
     placeholder: String,
+    type_: String,
     value: ReadSignal<String>,
     on_input: WriteSignal<String>,
 ) -> impl IntoView {
@@ -15,6 +16,7 @@ pub fn Input(
             class=all_classes
             name=name
             placeholder=placeholder
+            type=type_
             bind:value=(value, on_input)
         />
     }
