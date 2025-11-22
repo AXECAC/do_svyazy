@@ -1,13 +1,10 @@
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
 use axum::Router;
 use axum::routing::*;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use app::*;
 use leptos::logging::log;
-use share::RegisterUser;
+use server::handlers::register;
 use tower_http::cors::{Any, CorsLayer};
 
 mod config;
@@ -25,7 +22,7 @@ async fn main() {
     let routes = generate_route_list(App);
 
     let app = Router::new()
-        .route("/registration", post(handle_register))
+        .route("/registration", post(register))
         .with_state(db_pool)
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
@@ -47,15 +44,4 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn handle_register(Json(user): Json<RegisterUser>) -> impl IntoResponse {
-    println!("Registering user: {:?}", user);
-
-    let token = "abc".to_string();
-
-    (
-        StatusCode::OK,
-        axum::Json(token)
-    )
 }

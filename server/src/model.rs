@@ -9,14 +9,4 @@ pub struct User{
     #[serde(skip_serializing)]
     pub password_hash: String
 }
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LoginUser{
-    pub email: String,
-    pub password: String
-}
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct AuthResponse{
-    pub user: User,
-    pub message: String,
-}

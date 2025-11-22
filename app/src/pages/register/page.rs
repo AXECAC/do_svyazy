@@ -12,18 +12,12 @@ use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
 use crate::components::input::component::{Input, InputProps};
 
-fn navigation() -> (Rc<impl Fn(MouseEvent)>, Rc<impl Fn(MouseEvent)>) {
-    let navigate_to_home = use_navigate();
+fn navigation() -> Rc<impl Fn(MouseEvent)> {
     let navigate_to_login = use_navigate();
 
-    (
-        Rc::new(move |_| {
-            navigate_to_home("/", Default::default());
-        }),
-        Rc::new(move |_| {
-            navigate_to_login("/login", Default::default());
-        }),
-    )
+    Rc::new(move |_| {
+        navigate_to_login("/login", Default::default());
+    })
 }
 
 async fn handle_register(user: RegisterUser) {
@@ -32,31 +26,38 @@ async fn handle_register(user: RegisterUser) {
         .json(&user)
         .send()
         .await;
-
+    web_sys::console::log_1(&"aboba".into());
     match response {
         Ok(resp) => {
+            web_sys::console::log_1(&"Ок".into());
             match resp.status() {
                 StatusCode::OK => {
-                    let token: String = resp.json().await.unwrap();
+                    web_sys::console::log_1(&"Not conflict".into());
 
-                    let (_token, set_token) = use_cookie_with_options::<String, FromToStringCodec>(
-                        "auth_token",
-                        UseCookieOptions::default().secure(false).path("/"),
-                    );
-                    Effect::new(move |_| {
-                        set_token.set(Some(token.clone()));
-                    });
-
-                    // Переходим на домашнюю страницу
-                    let navigate = use_navigate();
-                    navigate("/", Default::default());
+                    if let Ok(token) = resp.json::<String>().await {
+                        let (_token, set_token) =
+                            use_cookie_with_options::<String, FromToStringCodec>(
+                                "auth_token",
+                                UseCookieOptions::default().secure(false).path("/"),
+                            );
+                        Effect::new(move |_| {
+                            set_token.set(Some(token.clone()));
+                        });
+                        // Переходим на домашнюю страницу
+                        let navigate = use_navigate();
+                        navigate("/", Default::default());
+                    }
                 }
-                StatusCode::CONFLICT => {}
-                _ => {}
+                StatusCode::CONFLICT => {
+                    web_sys::console::log_1(&"aboba".into());
+                }
+                _ => {
+                    web_sys::console::log_1(&"500".into());
+                }
             }
         }
         Err(_) => {
-            println!("Помянем сеть")
+            web_sys::console::log_1(&"Помянем сеть".into());
         }
     }
 }
@@ -67,7 +68,7 @@ pub fn RegisterPage() -> impl IntoView {
     let (password, set_password) = signal("".to_string());
     let (phio, set_phio) = signal("".to_string());
 
-    let (go_home, go_to_login) = navigation();
+    let go_to_login = navigation();
 
     let input_class = "register_input".to_string();
     // Обработчик клика на кнопку регистрации
@@ -88,11 +89,10 @@ pub fn RegisterPage() -> impl IntoView {
             });
         }
     });
-    let is_success = Rc::new(true);
 
     view! {
         <div class="register_container">
-            <h1 class="register_header">"Добро пожаловать"</h1>
+            <h1 class="register_header">"Регистрация"</h1>
             {
                 Input(InputProps{
                     class_name: input_class.clone(),
@@ -132,13 +132,6 @@ pub fn RegisterPage() -> impl IntoView {
             }
 
             <div class="go_to_container">
-                {
-                    Button(ButtonProps {
-                        class_name: "go_to_button".to_string(),
-                        children: Children::to_children(|| "На главную"),
-                        on_click: Some(go_home),
-                    })
-                }
                 {
                     Button(ButtonProps {
                         class_name: "go_to_button".to_string(),
