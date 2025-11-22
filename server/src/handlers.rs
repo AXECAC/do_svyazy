@@ -1,8 +1,8 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use share::{LoginUser, RegisterUser, Tags};
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres, QueryBuilder};
 
-use crate::auth::hash_password;
+use crate::{auth::hash_password};
 
 pub async fn register(
     State(pool): State<PgPool>,
@@ -69,4 +69,38 @@ pub async fn get_base_tags(State(pool): State<PgPool>) -> Result<impl IntoRespon
         .collect();
 
     Ok(Json(tags))
+}
+
+pub async fn set_base_tags(
+    State(pool): State<PgPool>,
+    Json((tags, email)): Json<(Vec<i32>, String)>,
+) -> Result<impl IntoResponse, String> {
+    let user = sqlx::query!("SELECT id FROM users WHERE email = $1", email)
+        .fetch_optional(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let user_id = if let Some(u) = user {
+        u.id
+    } else {
+        return Ok((StatusCode::NOT_FOUND, Json("Увы".to_string())));
+    };
+
+    // Строим запрос для вставки нескольких строк в user_tags
+    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
+        "INSERT INTO user_tags (user_id, tag_id) "
+    );
+
+    query_builder.push_values(tags.iter(), |mut b, tag_id| {
+        b.push_bind(user_id);
+        b.push_bind(tag_id);
+    });
+
+    // Выполняем запрос
+    query_builder.build()
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok((StatusCode::OK, Json("Сохранено".to_string())))
 }
