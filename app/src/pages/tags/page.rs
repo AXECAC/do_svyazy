@@ -6,7 +6,7 @@ use leptos::ev::MouseEvent;
 use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
 use leptos_router::hooks::use_navigate;
-use leptos_use::{use_cookie, use_cookie_with_options, UseCookieOptions};
+use leptos_use::use_cookie;
 use share::Tags;
 
 use crate::components::button::component::Button;
@@ -77,10 +77,9 @@ async fn handle_set_tags(tags: Vec<i32>, email: String, error: WriteSignal<Strin
         Ok(resp) => match resp.status() {
             StatusCode::OK => {
                 let navigate = use_navigate();
-                // TODO: поставить следующую страницу
-                navigate("/login", Default::default());
+                navigate("/friends", Default::default());
             }
-            StatusCode::NOT_FOUND => error.set("Ошибка сервера при получении тегов".to_string()),
+            StatusCode::NOT_FOUND => error.set("Не найден ваш аккаунт".to_string()),
             _ => error.set("Ошибка сервера при получении тегов".to_string()),
         },
         Err(_) => error.set("Проблема с сетью при получении тегов".to_string()),

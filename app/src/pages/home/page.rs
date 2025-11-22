@@ -19,7 +19,7 @@ pub fn HomePage() -> impl IntoView {
 
                         if let Some(tok) = token.get() {
                             if !tok.is_empty() {
-                                navigate_to_login("/login", Default::default())
+                                navigate_to_login("/friends", Default::default())
                             } else {
                                 navigate_to_home("/register", Default::default())
                             }

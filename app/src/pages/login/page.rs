@@ -6,7 +6,7 @@ use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
 use leptos_router::hooks::use_navigate;
 use leptos_use::{use_cookie_with_options, UseCookieOptions};
-use share::{LoginUser, RegisterUser};
+use share::LoginUser;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
@@ -41,7 +41,7 @@ async fn handle_login(user: LoginUser, error: WriteSignal<String>) {
                         });
                         // Переходим на домашнюю страницу
                         let navigate = use_navigate();
-                        navigate("/tags", Default::default());
+                        navigate("/friends", Default::default());
                     }
                 }
                 StatusCode::NOT_FOUND => {
