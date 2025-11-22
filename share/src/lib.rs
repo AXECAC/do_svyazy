@@ -19,3 +19,11 @@ pub struct Tags {
     pub name: String,
     pub custom: bool
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrontUser {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub bio: String,
+}

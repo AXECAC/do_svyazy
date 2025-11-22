@@ -4,8 +4,10 @@ use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use app::*;
 use leptos::logging::log;
+use server::handlers::add_friend;
 use server::handlers::get_all_people;
 use server::handlers::get_base_tags;
+use server::handlers::get_friends;
 use server::handlers::get_people_by_name;
 use server::handlers::login;
 use server::handlers::register;
@@ -33,6 +35,8 @@ async fn main() {
         .route("/set_base_tags", post(set_base_tags))
         .route("/get_all_people", post(get_all_people))
         .route("/get_people_by_name", post(get_people_by_name))
+        .route("/add_friend", post(add_friend))
+        .route("/get_friends", post(get_friends))
         .with_state(db_pool)
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
