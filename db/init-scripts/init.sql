@@ -27,8 +27,7 @@ CREATE TABLE "tags" (
 		INCREMENT BY 1
 	),
   "name" varchar,
-  "usage_count" integer DEFAULT 0,
-  "description" text
+  "custom" boolean
 );
 
 CREATE TABLE "communities" (

@@ -18,5 +18,6 @@ tower.workspace = true
 tower-http.workspace = true
 log.workspace = true
 sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio"] }
-bcrypt = "0.17.1"
+sha2 = "0.10.9"
+hex = "0.4.3"
 serde = "1.0.228"

@@ -6,7 +6,7 @@ use leptos_router::{
     StaticSegment,
 };
 
-use crate::pages::{home::page::HomePage, login::page::LoginPage, register::page::RegisterPage};
+use crate::pages::{home::page::HomePage, login::page::LoginPage, register::page::RegisterPage, tags::page::TagsPage};
 
 mod components;
 mod pages;
@@ -49,6 +49,7 @@ pub fn App() -> impl IntoView {
                     <Route path=StaticSegment("") view=HomePage/>
                     <Route path=StaticSegment("login") view=LoginPage/>
                     <Route path=StaticSegment("register") view=RegisterPage/>
+                    <Route path=StaticSegment("tags") view=TagsPage/>
                 </Routes>
             </main>
         </Router>

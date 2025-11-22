@@ -4,6 +4,7 @@ use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use app::*;
 use leptos::logging::log;
+use server::handlers::login;
 use server::handlers::register;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -23,6 +24,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/registration", post(register))
+        .route("/login", post(login))
         .with_state(db_pool)
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();

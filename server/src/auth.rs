@@ -1,9 +1,9 @@
-use bcrypt::{hash, verify, DEFAULT_COST};
+use hex;
+use sha2::{Digest, Sha512};
 
-pub fn hash_password(password: &str) -> Result<String, bcrypt::BcryptError> {
-    hash(password, DEFAULT_COST)
-}
-
-pub fn verify_password(password: &str, hash: &str) -> Result<bool, bcrypt::BcryptError> {
-    verify(password, hash)
+pub fn hash_password(password: &String) -> String {
+    let mut hasher = Sha512::new();
+    hasher.update(password);
+    let result = hasher.finalize();
+    hex::encode(result)
 }

@@ -20,20 +20,16 @@ fn navigation() -> Rc<impl Fn(MouseEvent)> {
     })
 }
 
-async fn handle_register(user: RegisterUser) {
+async fn handle_register(user: RegisterUser, error: WriteSignal<String>) {
     let response = reqwest::Client::new()
         .post("http://127.0.0.1:3000/registration")
         .json(&user)
         .send()
         .await;
-    web_sys::console::log_1(&"aboba".into());
     match response {
         Ok(resp) => {
-            web_sys::console::log_1(&"Ок".into());
             match resp.status() {
                 StatusCode::OK => {
-                    web_sys::console::log_1(&"Not conflict".into());
-
                     if let Ok(token) = resp.json::<String>().await {
                         let (_token, set_token) =
                             use_cookie_with_options::<String, FromToStringCodec>(
@@ -45,19 +41,19 @@ async fn handle_register(user: RegisterUser) {
                         });
                         // Переходим на домашнюю страницу
                         let navigate = use_navigate();
-                        navigate("/", Default::default());
+                        navigate("/tags", Default::default());
                     }
                 }
                 StatusCode::CONFLICT => {
-                    web_sys::console::log_1(&"aboba".into());
+                    error.set("Почта уже занята".to_string());
                 }
                 _ => {
-                    web_sys::console::log_1(&"500".into());
+                    error.set("Сервер помер".to_string());
                 }
             }
         }
         Err(_) => {
-            web_sys::console::log_1(&"Помянем сеть".into());
+            error.set("Помянем сеть".to_string());
         }
     }
 }
@@ -70,6 +66,7 @@ pub fn RegisterPage() -> impl IntoView {
 
     let go_to_login = navigation();
 
+    let (error, set_error) = signal(String::new());
     let input_class = "register_input".to_string();
     // Обработчик клика на кнопку регистрации
     let on_register_click = Rc::new({
@@ -85,7 +82,7 @@ pub fn RegisterPage() -> impl IntoView {
             };
             // Запускаем async задачу внутри Leptos
             wasm_bindgen_futures::spawn_local(async move {
-                handle_register(user).await;
+                handle_register(user, set_error).await;
             });
         }
     });
@@ -93,10 +90,11 @@ pub fn RegisterPage() -> impl IntoView {
     view! {
         <div class="register_container">
             <h1 class="register_header">"Регистрация"</h1>
+            <p class="text_error">{error}</p>
             {
                 Input(InputProps{
                     class_name: input_class.clone(),
-                    name: "register-email".to_string(),
+                    name: "register-name".to_string(),
                     placeholder: "ФИО:".to_string(),
                     type_: "text".to_string(),
                     value: phio,
