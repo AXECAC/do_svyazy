@@ -1,13 +1,15 @@
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
 use axum::Router;
 use axum::routing::*;
 use leptos::prelude::*;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use app::*;
 use leptos::logging::log;
-use share::RegisterUser;
+use server::handlers::get_all_people;
+use server::handlers::get_base_tags;
+use server::handlers::get_people_by_name;
+use server::handlers::login;
+use server::handlers::register;
+use server::handlers::set_base_tags;
 use tower_http::cors::{Any, CorsLayer};
 
 mod config;
@@ -25,14 +27,19 @@ async fn main() {
     let routes = generate_route_list(App);
 
     let app = Router::new()
-        .route("/registration", post(handle_register))
+        .route("/registration", post(register))
+        .route("/login", post(login))
+        .route("/get_base_tags", get(get_base_tags))
+        .route("/set_base_tags", post(set_base_tags))
+        .route("/get_all_people", post(get_all_people))
+        .route("/get_people_by_name", post(get_people_by_name))
+        .with_state(db_pool)
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())
         })
         .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options)
-        .with_state(db_pool)
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -47,15 +54,4 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
-}
-
-async fn handle_register(Json(user): Json<RegisterUser>) -> impl IntoResponse {
-    println!("Registering user: {:?}", user);
-
-    let token = "abc".to_string();
-
-    (
-        StatusCode::OK,
-        axum::Json(token)
-    )
 }

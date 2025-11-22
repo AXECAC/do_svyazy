@@ -12,51 +12,48 @@ use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
 use crate::components::input::component::{Input, InputProps};
 
-fn navigation() -> (Rc<impl Fn(MouseEvent)>, Rc<impl Fn(MouseEvent)>) {
-    let navigate_to_home = use_navigate();
+fn navigation() -> Rc<impl Fn(MouseEvent)> {
     let navigate_to_login = use_navigate();
 
-    (
-        Rc::new(move |_| {
-            navigate_to_home("/", Default::default());
-        }),
-        Rc::new(move |_| {
-            navigate_to_login("/login", Default::default());
-        }),
-    )
+    Rc::new(move |_| {
+        navigate_to_login("/login", Default::default());
+    })
 }
 
-async fn handle_register(user: RegisterUser) {
+async fn handle_register(user: RegisterUser, error: WriteSignal<String>) {
     let response = reqwest::Client::new()
         .post("http://127.0.0.1:3000/registration")
         .json(&user)
         .send()
         .await;
-
     match response {
         Ok(resp) => {
             match resp.status() {
                 StatusCode::OK => {
-                    let token: String = resp.json().await.unwrap();
-
-                    let (_token, set_token) = use_cookie_with_options::<String, FromToStringCodec>(
-                        "auth_token",
-                        UseCookieOptions::default().secure(false).path("/"),
-                    );
-                    Effect::new(move |_| {
-                        set_token.set(Some(token.clone()));
-                    });
-
-                    // Переходим на домашнюю страницу
-                    let navigate = use_navigate();
-                    navigate("/", Default::default());
+                    if let Ok(token) = resp.json::<String>().await {
+                        let (_token, set_token) =
+                            use_cookie_with_options::<String, FromToStringCodec>(
+                                "auth_token",
+                                UseCookieOptions::default().secure(false).path("/"),
+                            );
+                        Effect::new(move |_| {
+                            set_token.set(Some(token.clone()));
+                        });
+                        // Переходим на домашнюю страницу
+                        let navigate = use_navigate();
+                        navigate("/tags", Default::default());
+                    }
                 }
-                StatusCode::CONFLICT => {}
-                _ => {}
+                StatusCode::CONFLICT => {
+                    error.set("Почта уже занята".to_string());
+                }
+                _ => {
+                    error.set("Сервер помер".to_string());
+                }
             }
         }
         Err(_) => {
-            println!("Помянем сеть")
+            error.set("Помянем сеть".to_string());
         }
     }
 }
@@ -67,8 +64,9 @@ pub fn RegisterPage() -> impl IntoView {
     let (password, set_password) = signal("".to_string());
     let (phio, set_phio) = signal("".to_string());
 
-    let (go_home, go_to_login) = navigation();
+    let go_to_login = navigation();
 
+    let (error, set_error) = signal(String::new());
     let input_class = "register_input".to_string();
     // Обработчик клика на кнопку регистрации
     let on_register_click = Rc::new({
@@ -84,19 +82,19 @@ pub fn RegisterPage() -> impl IntoView {
             };
             // Запускаем async задачу внутри Leptos
             wasm_bindgen_futures::spawn_local(async move {
-                handle_register(user).await;
+                handle_register(user, set_error).await;
             });
         }
     });
-    let is_success = Rc::new(true);
 
     view! {
         <div class="register_container">
-            <h1 class="register_header">"Добро пожаловать"</h1>
+            <h1 class="register_header">"Регистрация"</h1>
+            <p class="text_error">{error}</p>
             {
                 Input(InputProps{
                     class_name: input_class.clone(),
-                    name: "register-email".to_string(),
+                    name: "register-name".to_string(),
                     placeholder: "ФИО:".to_string(),
                     type_: "text".to_string(),
                     value: phio,
@@ -132,13 +130,6 @@ pub fn RegisterPage() -> impl IntoView {
             }
 
             <div class="go_to_container">
-                {
-                    Button(ButtonProps {
-                        class_name: "go_to_button".to_string(),
-                        children: Children::to_children(|| "На главную"),
-                        on_click: Some(go_home),
-                    })
-                }
                 {
                     Button(ButtonProps {
                         class_name: "go_to_button".to_string(),
