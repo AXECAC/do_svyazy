@@ -10,3 +10,9 @@ pub struct User{
     pub password_hash: String
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+pub struct Tags {
+    pub id: i32,
+    pub name: String,
+    pub custom: bool
+}

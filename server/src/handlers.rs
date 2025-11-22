@@ -1,5 +1,5 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use share::{LoginUser, RegisterUser};
+use share::{LoginUser, RegisterUser, Tags};
 use sqlx::PgPool;
 
 use crate::auth::hash_password;
@@ -51,4 +51,22 @@ pub async fn login(
     }
 
     Ok((StatusCode::NOT_FOUND, Json("Увы".to_string())))
+}
+
+pub async fn get_base_tags(State(pool): State<PgPool>) -> Result<impl IntoResponse, String> {
+    let get_tags = sqlx::query!("SELECT id, name, custom FROM tags WHERE custom = false;")
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let tags: Vec<Tags> = get_tags
+        .into_iter()
+        .map(|record| Tags {
+            id: record.id,
+            name: record.name.unwrap(),
+            custom: record.custom.unwrap(),
+        })
+        .collect();
+
+    Ok(Json(tags))
 }
