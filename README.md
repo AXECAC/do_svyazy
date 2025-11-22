@@ -39,7 +39,12 @@ To prevent clippy from complaining, at the top of the `frontend/src/lib.rs` file
 #[allow(unused_imports)]
 use app;
 ```
+## Database compose
+```bash
+cd db
 
+docker compose up -d
+```
 ## Running your project
 
 ```bash
