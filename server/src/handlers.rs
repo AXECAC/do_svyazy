@@ -87,9 +87,8 @@ pub async fn set_base_tags(
     };
 
     // Строим запрос для вставки нескольких строк в user_tags
-    let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-        "INSERT INTO user_tags (user_id, tag_id) "
-    );
+    let mut query_builder: QueryBuilder<Postgres> =
+        QueryBuilder::new("INSERT INTO user_tags (user_id, tag_id) ");
 
     query_builder.push_values(tags.iter(), |mut b, tag_id| {
         b.push_bind(user_id);
@@ -97,7 +96,8 @@ pub async fn set_base_tags(
     });
 
     // Выполняем запрос
-    query_builder.build()
+    query_builder
+        .build()
         .execute(&pool)
         .await
         .map_err(|e| e.to_string())?;
@@ -125,15 +125,21 @@ pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoRespo
     Ok(Json(users))
 }
 
-pub async fn get_people_by_name(State(pool): State<PgPool>, Json(email): Json<String>) -> Result<impl IntoResponse, String> {
+pub async fn get_people_by_name(
+    State(pool): State<PgPool>,
+    Json(email): Json<String>,
+) -> Result<impl IntoResponse, String> {
     let mut search_by_email = String::from("%");
     search_by_email.push_str(&email);
     search_by_email.push_str("%");
 
-    let get_users = sqlx::query!("SELECT id, username FROM users WHERE email ILIKE $1;", search_by_email)
-        .fetch_all(&pool)
-        .await
-        .map_err(|e| e.to_string())?;
+    let get_users = sqlx::query!(
+        "SELECT id, username FROM users WHERE email ILIKE $1;",
+        search_by_email
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
 
     let users: Vec<User> = get_users
         .into_iter()
@@ -149,3 +155,27 @@ pub async fn get_people_by_name(State(pool): State<PgPool>, Json(email): Json<St
     Ok(Json(users))
 }
 
+pub async fn add_friend(
+    State(pool): State<PgPool>,
+    Json((email, friend_id)): Json<(String, i32)>,
+) -> Result<impl IntoResponse, String> {
+    let user_id = sqlx::query!("SELECT id FROM users WHERE email = $1;", email)
+        .fetch_optional(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if user_id.is_none() {
+        return Ok((StatusCode::NOT_FOUND, Json("Увы".to_string())));
+    }
+
+    let _user = sqlx::query!(
+        "INSERT INTO user_subscribers (user_id, subscriber_id) VALUES ($1, $2);",
+        user_id.unwrap().id,
+        friend_id,
+    )
+    .execute(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok((StatusCode::OK, Json("Success".to_string())))
+}
