@@ -1,5 +1,5 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use share::{LoginUser, RegisterUser, Tags};
+use share::{FrontUser, LoginUser, RegisterUser, Tags};
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
 use crate::{auth::hash_password, model::User};
@@ -177,5 +177,59 @@ pub async fn add_friend(
     .await
     .map_err(|e| e.to_string())?;
 
-    Ok((StatusCode::OK, Json("Success".to_string())))
+    Ok((StatusCode::OK, Json("Успешно".to_string())))
+}
+
+pub async fn get_friends(
+    State(pool): State<PgPool>,
+    Json(email): Json<String>,
+) -> Result<impl IntoResponse, String> {
+    let user_id = sqlx::query!("SELECT id FROM users WHERE email = $1;", email)
+        .fetch_optional(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if user_id.is_none() {
+        return Ok((StatusCode::NOT_FOUND, Json(Vec::<FrontUser>::new())));
+    }
+
+    let friends_ids = sqlx::query!(
+        "SELECT subscriber_id FROM user_subscribers WHERE user_id = $1;",
+        user_id.unwrap().id
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    // Собираем список id друзей в вектор
+    let friend_ids_vec: Vec<i32> = friends_ids.iter().map(|f| f.subscriber_id).collect();
+
+    if friend_ids_vec.is_empty() {
+        // Возвращаем пустой список, если друзей нет
+        return Ok((StatusCode::OK, Json(Vec::<FrontUser>::new())));
+    }
+
+    // Запрос для получения данных по списку id друзей
+    let friends_data = sqlx::query!(
+        "SELECT id, username, email, bio FROM users WHERE id = ANY($1)",
+        &friend_ids_vec
+    )
+    .fetch_all(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok((
+        StatusCode::OK,
+        Json(
+            friends_data
+                .iter()
+                .map(|data| FrontUser {
+                    id: data.id,
+                    username: data.username.clone().unwrap(),
+                    email: data.email.clone().unwrap(),
+                    bio: data.bio.clone().unwrap(),
+                })
+                .collect(),
+        ),
+    ))
 }
