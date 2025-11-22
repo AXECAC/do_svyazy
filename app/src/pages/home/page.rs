@@ -7,27 +7,38 @@ use leptos_use::use_cookie;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
-
 /// Renders the home page of your application.
+
+fn test() {
+    let navigate_to_home = use_navigate();
+    let navigate_to_login = use_navigate();
+
+    let mut check_token = false;
+    Effect::new(move |_| {
+        let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
+        check_token = token.try_get().is_some();
+        if check_token {
+            navigate_to_login("/login", Default::default())
+        } else {
+            navigate_to_home("/register", Default::default())
+        }
+    });
+}
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let navigate = use_navigate();
-    let go_to_register = Rc::new(move |_| {
-
-        navigate("/register", Default::default());
+    let nav = Rc::new({
+        move |_| {
+            test();
+        }
     });
 
-        let (token, _set_tocken) = use_cookie::<String, FromToStringCodec>("auth_token");
-
     view! {
-        <div class="home_container">
-            <p> {move ||token.get()} </p>
-            <img class="mascot" src="mascot.png"/>
+        <div>
             {
                 Button(ButtonProps {
-                    class_name: "".to_string(),
-                    children: Children::to_children(|| "Создать аккаунт"),
-                    on_click: Some(go_to_register)
+                    class_name: "register_button".to_string(),
+                    children: Children::to_children(|| "Зарегестрироваться"),
+                    on_click: Some(nav),
                 })
             }
         </div>
