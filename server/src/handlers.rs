@@ -106,7 +106,7 @@ pub async fn set_base_tags(
 }
 
 pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoResponse, String> {
-    let get_users = sqlx::query!("SELECT id, name FROM users;")
+    let get_users = sqlx::query!("SELECT id, username FROM users;")
         .fetch_all(&pool)
         .await
         .map_err(|e| e.to_string())?;
@@ -115,7 +115,31 @@ pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoRespo
         .into_iter()
         .map(|record| User {
             id: record.id,
-            username: record.unsername.unwrap(),
+            username: record.username.unwrap(),
+            email: String::new(),
+            bio: String::new(),
+            password_hash: String::new(),
+        })
+        .collect();
+
+    Ok(Json(users))
+}
+
+pub async fn get_people_by_name(State(pool): State<PgPool>, Json(email): Json<String>) -> Result<impl IntoResponse, String> {
+    let mut search_by_email = String::from("%");
+    search_by_email.push_str(&email);
+    search_by_email.push_str("%");
+
+    let get_users = sqlx::query!("SELECT id, username FROM users WHERE email ILIKE $1;", search_by_email)
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let users: Vec<User> = get_users
+        .into_iter()
+        .map(|record| User {
+            id: record.id,
+            username: record.username.unwrap(),
             email: String::new(),
             bio: String::new(),
             password_hash: String::new(),

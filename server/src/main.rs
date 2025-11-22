@@ -6,6 +6,7 @@ use app::*;
 use leptos::logging::log;
 use server::handlers::get_all_people;
 use server::handlers::get_base_tags;
+use server::handlers::get_people_by_name;
 use server::handlers::login;
 use server::handlers::register;
 use server::handlers::set_base_tags;
@@ -31,6 +32,7 @@ async fn main() {
         .route("/get_base_tags", get(get_base_tags))
         .route("/set_base_tags", post(set_base_tags))
         .route("/get_all_people", post(get_all_people))
+        .route("/get_people_by_name", post(get_people_by_name))
         .with_state(db_pool)
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
