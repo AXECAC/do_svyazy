@@ -2,7 +2,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use share::{LoginUser, RegisterUser, Tags};
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
-use crate::{auth::hash_password};
+use crate::{auth::hash_password, model::User};
 
 pub async fn register(
     State(pool): State<PgPool>,
@@ -104,3 +104,24 @@ pub async fn set_base_tags(
 
     Ok((StatusCode::OK, Json("Сохранено".to_string())))
 }
+
+pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoResponse, String> {
+    let get_users = sqlx::query!("SELECT id, name FROM users;")
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let users: Vec<User> = get_users
+        .into_iter()
+        .map(|record| User {
+            id: record.id,
+            username: record.unsername.unwrap(),
+            email: String::new(),
+            bio: String::new(),
+            password_hash: String::new(),
+        })
+        .collect();
+
+    Ok(Json(users))
+}
+
