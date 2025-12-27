@@ -1,5 +1,7 @@
 use leptos::{prelude::*, IntoView};
 
+stylance::import_crate_style!(style, "src/components/input/input.module.scss");
+
 #[component]
 pub fn Input(
     class_name: String,
@@ -9,11 +11,9 @@ pub fn Input(
     value: ReadSignal<String>,
     on_input: WriteSignal<String>,
 ) -> impl IntoView {
-    let all_classes = format!("{} {}", class_name, "input");
-
     view! {
         <input
-            class=all_classes
+            class=format!("{} {}", class_name, style::input)
             name=name
             placeholder=placeholder
             type=type_

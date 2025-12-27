@@ -2,6 +2,8 @@ use std::rc::Rc;
 
 use leptos::{children::Children, ev::MouseEvent, html::ElementChild, prelude::*, IntoView};
 
+stylance::import_crate_style!(style, "src/components/button/button.module.scss");
+
 #[component]
 pub fn Button(
     class_name: String,
@@ -16,10 +18,10 @@ pub fn Button(
         }
     };
 
-    let all_classes = format!("{} {}", class_name, "button");
-
     view! {
-        <button class=all_classes on:click=click_handler>
+        <button
+            class=format!("{} {}", class_name, style::button)
+            on:click=click_handler>
             {children()}
         </button>
     }
