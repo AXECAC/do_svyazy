@@ -1,0 +1,42 @@
+.login_header {
+  font-size: 2rem;
+  color: #023E8A;
+}
+
+.login_container {
+  display: flex;
+  height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  justify-content: center;
+}
+
+
+.login_input {
+  width: 250px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.login_button {
+  width: 270px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.go_to_container {
+  display: flex;
+  padding: 0;
+}
+
+.go_to_button {
+  width: 100px;
+  background-color: #FFFFFF;
+  color: #023E8A;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  margin-top: 1.5rem;
+}

@@ -30,21 +30,25 @@ pub fn FriendsPage() -> impl IntoView {
                 <button
                     class:selected=move || selected_tab.get() == "all"
                     on:click=move |_| set_selected_tab.set("all".to_string())
-                >"Все люди"</button>
+                >
+                    "Все люди"
+                </button>
                 <button
                     class:selected=move || selected_tab.get() == "friends"
                     on:click=move |_| set_selected_tab.set("friends".to_string())
-                >"Друзья"</button>
+                >
+                    "Друзья"
+                </button>
                 <button
                     class:selected=move || selected_tab.get() == "recommended"
                     on:click=move |_| set_selected_tab.set("recommended".to_string())
-                >"Рекомендации"</button>
+                >
+                    "Рекомендации"
+                </button>
             </div>
 
             // Пустой блок для вывода людей
-            <div style="margin-top: 20px;">
-                {}
-            </div>
+            <div style="margin-top: 20px;">{}</div>
         </div>
     }
 }

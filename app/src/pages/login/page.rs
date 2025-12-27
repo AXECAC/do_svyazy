@@ -12,6 +12,8 @@ use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
 use crate::components::input::component::{Input, InputProps};
 
+stylance::import_crate_style!(style, "src/pages/login/login.module.scss");
+
 fn navigation() -> Rc<impl Fn(MouseEvent)> {
     let navigate_to_login = use_navigate();
 
@@ -66,8 +68,8 @@ pub fn LoginPage() -> impl IntoView {
     let go_to_register = navigation();
 
     let (error, set_error) = signal(String::new());
-    let input_class = "register_input".to_string();
-    // Обработчик клика на кнопку регистрации
+    let input_class = style::login_input.to_string();
+
     let on_login_click = Rc::new({
         let email = email.clone();
         let password = password.clone();
@@ -85,45 +87,37 @@ pub fn LoginPage() -> impl IntoView {
     });
 
     view! {
-        <div class="register_container">
-            <h1 class="register_header">"Логин"</h1>
+        <div class=style::login_container.to_string()>
+            <h1 class=style::login_header.to_string()>"Вход"</h1>
             <p class="text_error">{error}</p>
-            {
-                Input(InputProps{
-                    class_name: input_class.clone(),
-                    name: "login-email".to_string(),
-                    placeholder: "Почта:".to_string(),
-                    type_: "email".to_string(),
-                    value: email,
-                    on_input: set_email
-                })
-            }
-            {
-                Input(InputProps{
-                    class_name: input_class,
-                    name: "login-password".to_string(),
-                    placeholder: "Пароль:".to_string(),
-                    type_: "password".to_string(),
-                    value: password,
-                    on_input: set_password
-                })
-            }
-            {
-                Button(ButtonProps {
-                    class_name: "register_button".to_string(),
-                    children: Children::to_children(|| "войти"),
-                    on_click: Some(on_login_click),
-                })
-            }
+            {Input(InputProps {
+                class_name: input_class.clone(),
+                name: "login-email".to_string(),
+                placeholder: "Почта:".to_string(),
+                type_: "email".to_string(),
+                value: email,
+                on_input: set_email,
+            })}
+            {Input(InputProps {
+                class_name: input_class,
+                name: "login-password".to_string(),
+                placeholder: "Пароль:".to_string(),
+                type_: "password".to_string(),
+                value: password,
+                on_input: set_password,
+            })}
+            {Button(ButtonProps {
+                class_name: style::login_button.to_string(),
+                children: Children::to_children(|| "войти"),
+                on_click: Some(on_login_click),
+            })}
 
-            <div class="go_to_container">
-                {
-                    Button(ButtonProps {
-                        class_name: "go_to_button".to_string(),
-                        children: Children::to_children(|| "Зарегестрироваться"),
-                        on_click: Some(go_to_register),
-                    })
-                }
+            <div class=style::go_to_container>
+                {Button(ButtonProps {
+                    class_name: style::go_to_button.to_string(),
+                    children: Children::to_children(|| "Зарегестрироваться"),
+                    on_click: Some(go_to_register),
+                })}
             </div>
         </div>
     }

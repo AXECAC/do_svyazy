@@ -30,12 +30,7 @@ fn Tag(tag: Tags, selected_tags: RwSignal<HashSet<i32>>) -> impl IntoView {
         <div style="">
             <label>
                 {tag.name.clone()}
-                <input
-                    type="checkbox"
-                    name="tags"
-                    prop:checked=is_checked()
-                    on:click=on_click
-                />
+                <input type="checkbox" name="tags" prop:checked=is_checked() on:click=on_click />
             </label>
         </div>
     }
@@ -115,38 +110,35 @@ pub fn TagsPage() -> impl IntoView {
     });
 
     view! {
-        {
-            move || {
-            // При загрузке страницы, один раз подгружает Tags
-                    Effect::new(
-                    move || {
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let fetched_tags = handle_get_tags(set_error).await;
-                            set_tags.set(fetched_tags);
-                    });
+        {move || {
+            Effect::new(move || {
+                wasm_bindgen_futures::spawn_local(async move {
+                    let fetched_tags = handle_get_tags(set_error).await;
+                    set_tags.set(fetched_tags);
                 });
-            }
-        }
+            });
+        }}
         <div class="register_container">
-            <h1 class="register_header">"Выберете ваши интересы"</h1>
+            <h1 class="register_header">"Выберите ваши интересы"</h1>
             <p class="text_error">{error}</p>
-                {move || {
-                    let items = tags.get();
-                    items.iter().map(|item| {
+            {move || {
+                let items = tags.get();
+                items
+                    .iter()
+                    .map(|item| {
                         view! {
                             <div>
-                                <Tag tag=item.clone() selected_tags=selected_tags/>
+                                <Tag tag=item.clone() selected_tags=selected_tags />
                             </div>
                         }
-                    }).collect::<Vec<_>>()
-                }}
-            {
-                Button(ButtonProps {
-                    class_name: "register_button".to_string(),
-                    children: Children::to_children(|| "войти"),
-                    on_click: Some(on_confirm),
-                })
-            }
+                    })
+                    .collect::<Vec<_>>()
+            }}
+            {Button(ButtonProps {
+                class_name: "register_button".to_string(),
+                children: Children::to_children(|| "войти"),
+                on_click: Some(on_confirm),
+            })}
         </div>
     }
 }
