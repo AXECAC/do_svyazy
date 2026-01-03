@@ -22,9 +22,12 @@ fn navigation() -> Rc<impl Fn(MouseEvent)> {
     })
 }
 
-async fn handle_login(user: LoginUser, error: WriteSignal<String>) {
+async fn handle_login(conf: ReadSignal<ConfFile>, user: LoginUser, error: WriteSignal<String>) {
     let response = reqwest::Client::new()
-        .post("http://127.0.0.1:3000/login")
+        .post(format!(
+            "http://{}/login",
+            conf.get().leptos_options.site_addr
+        ))
         .json(&user)
         .send()
         .await;
@@ -62,6 +65,7 @@ async fn handle_login(user: LoginUser, error: WriteSignal<String>) {
 
 #[component]
 pub fn LoginPage() -> impl IntoView {
+    let (conf, _set_conf) = signal(use_context::<ConfFile>().unwrap());
     let (email, set_email) = signal("".to_string());
     let (password, set_password) = signal("".to_string());
 
@@ -71,9 +75,6 @@ pub fn LoginPage() -> impl IntoView {
     let input_class = style::login_input.to_string();
 
     let on_login_click = Rc::new({
-        let email = email.clone();
-        let password = password.clone();
-
         move |_| {
             let user = LoginUser {
                 email: email.get(),
@@ -81,7 +82,7 @@ pub fn LoginPage() -> impl IntoView {
             };
             // Запускаем async задачу внутри Leptos
             wasm_bindgen_futures::spawn_local(async move {
-                handle_login(user, set_error).await;
+                handle_login(conf, user, set_error).await;
             });
         }
     });

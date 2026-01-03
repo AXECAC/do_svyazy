@@ -36,9 +36,12 @@ fn Tag(tag: Tags, selected_tags: RwSignal<HashSet<i32>>) -> impl IntoView {
     }
 }
 
-async fn handle_get_tags(error: WriteSignal<String>) -> Vec<Tags> {
+async fn handle_get_tags(conf: ReadSignal<ConfFile>, error: WriteSignal<String>) -> Vec<Tags> {
     let response = reqwest::Client::new()
-        .get("http://127.0.0.1:3000/get_base_tags")
+        .get(format!(
+            "http://{}/get_base_tags",
+            conf.get().leptos_options.site_addr
+        ))
         .send()
         .await;
     match response {
@@ -62,9 +65,17 @@ async fn handle_get_tags(error: WriteSignal<String>) -> Vec<Tags> {
     }
 }
 
-async fn handle_set_tags(tags: Vec<i32>, email: String, error: WriteSignal<String>) {
+async fn handle_set_tags(
+    conf: ReadSignal<ConfFile>,
+    tags: Vec<i32>,
+    email: String,
+    error: WriteSignal<String>,
+) {
     let response = reqwest::Client::new()
-        .post("http://127.0.0.1:3000/set_base_tags")
+        .post(format!(
+            "http://{}/set_base_tags",
+            conf.get().leptos_options.site_addr
+        ))
         .json(&(tags, email))
         .send()
         .await;
@@ -95,7 +106,7 @@ fn get_token(token_s: WriteSignal<String>) {
 
 #[component]
 pub fn TagsPage() -> impl IntoView {
-    // Signal хранит выбранный тег по id
+    let (conf, _set_conf) = signal(use_context::<ConfFile>().unwrap());
     let (error, set_error) = signal(String::new());
     let (tags, set_tags) = signal::<Vec<Tags>>(vec![]);
     let selected_tags: RwSignal<HashSet<i32>> = RwSignal::new(HashSet::new());
@@ -105,7 +116,7 @@ pub fn TagsPage() -> impl IntoView {
         let (token, set_token) = signal(String::new());
         get_token(set_token);
         wasm_bindgen_futures::spawn_local(async move {
-            handle_set_tags(chosen_tags, token.get(), set_error).await;
+            handle_set_tags(conf, chosen_tags, token.get(), set_error).await;
         });
     });
 
@@ -113,7 +124,7 @@ pub fn TagsPage() -> impl IntoView {
         {move || {
             Effect::new(move || {
                 wasm_bindgen_futures::spawn_local(async move {
-                    let fetched_tags = handle_get_tags(set_error).await;
+                    let fetched_tags = handle_get_tags(conf, set_error).await;
                     set_tags.set(fetched_tags);
                 });
             });

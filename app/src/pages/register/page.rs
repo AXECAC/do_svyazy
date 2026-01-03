@@ -22,9 +22,16 @@ fn navigation() -> Rc<impl Fn(MouseEvent)> {
     })
 }
 
-async fn handle_register(user: RegisterUser, error: WriteSignal<String>) {
+async fn handle_register(
+    conf: ReadSignal<ConfFile>,
+    user: RegisterUser,
+    error: WriteSignal<String>,
+) {
     let response = reqwest::Client::new()
-        .post("http://127.0.0.1:3000/registration")
+        .post(format!(
+            "http://{}/registration",
+            conf.get().leptos_options.site_addr
+        ))
         .json(&user)
         .send()
         .await;
@@ -62,6 +69,7 @@ async fn handle_register(user: RegisterUser, error: WriteSignal<String>) {
 
 #[component]
 pub fn RegisterPage() -> impl IntoView {
+    let (conf, _set_conf) = signal(use_context::<ConfFile>().unwrap());
     let (email, set_email) = signal("".to_string());
     let (password, set_password) = signal("".to_string());
     let (phio, set_phio) = signal("".to_string());
@@ -72,10 +80,6 @@ pub fn RegisterPage() -> impl IntoView {
     let input_class = style::register_input.to_string();
 
     let on_register_click = Rc::new({
-        let email = email.clone();
-        let password = password.clone();
-        let phio = phio.clone();
-
         move |_| {
             let user = RegisterUser {
                 username: phio.get(),
@@ -84,7 +88,7 @@ pub fn RegisterPage() -> impl IntoView {
             };
             // Запускаем async задачу внутри Leptos
             wasm_bindgen_futures::spawn_local(async move {
-                handle_register(user, set_error).await;
+                handle_register(conf, user, set_error).await;
             });
         }
     });
