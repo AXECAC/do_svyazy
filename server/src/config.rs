@@ -17,6 +17,6 @@ impl Config {
 pub async fn get_db_pool(database_url: &str) -> sqlx::PgPool {
     PgPoolOptions::new()
         .max_connections(5) // Set maximum number of connections
-        .connect(&database_url)
+        .connect(database_url)
         .await.unwrap()
 }

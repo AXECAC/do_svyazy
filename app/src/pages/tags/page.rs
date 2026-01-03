@@ -1,16 +1,14 @@
 use std::collections::HashSet;
 use std::rc::Rc;
-
-use http::StatusCode;
 use leptos::ev::MouseEvent;
 use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
-use leptos_router::hooks::use_navigate;
 use leptos_use::use_cookie;
 use share::Tags;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
+use crate::pages::tags::handlers::{handle_get_tags, handle_set_tags};
 
 #[component]
 fn Tag(tag: Tags, selected_tags: RwSignal<HashSet<i32>>) -> impl IntoView {
@@ -33,62 +31,6 @@ fn Tag(tag: Tags, selected_tags: RwSignal<HashSet<i32>>) -> impl IntoView {
                 <input type="checkbox" name="tags" prop:checked=is_checked() on:click=on_click />
             </label>
         </div>
-    }
-}
-
-async fn handle_get_tags(conf: ReadSignal<ConfFile>, error: WriteSignal<String>) -> Vec<Tags> {
-    let response = reqwest::Client::new()
-        .get(format!(
-            "http://{}/get_base_tags",
-            conf.get().leptos_options.site_addr
-        ))
-        .send()
-        .await;
-    match response {
-        Ok(resp) => match resp.status() {
-            StatusCode::OK => match resp.json::<Vec<Tags>>().await {
-                Ok(tags) => tags,
-                Err(_) => {
-                    error.set("Не удалось распарсить ответ с тегами".to_string());
-                    vec![]
-                }
-            },
-            _ => {
-                error.set("Ошибка сервера при получении тегов".to_string());
-                vec![]
-            }
-        },
-        Err(_) => {
-            error.set("Проблема с сетью при получении тегов".to_string());
-            vec![]
-        }
-    }
-}
-
-async fn handle_set_tags(
-    conf: ReadSignal<ConfFile>,
-    tags: Vec<i32>,
-    email: String,
-    error: WriteSignal<String>,
-) {
-    let response = reqwest::Client::new()
-        .post(format!(
-            "http://{}/set_base_tags",
-            conf.get().leptos_options.site_addr
-        ))
-        .json(&(tags, email))
-        .send()
-        .await;
-    match response {
-        Ok(resp) => match resp.status() {
-            StatusCode::OK => {
-                let navigate = use_navigate();
-                navigate("/friends", Default::default());
-            }
-            StatusCode::NOT_FOUND => error.set("Не найден ваш аккаунт".to_string()),
-            _ => error.set("Ошибка сервера при получении тегов".to_string()),
-        },
-        Err(_) => error.set("Проблема с сетью при получении тегов".to_string()),
     }
 }
 
