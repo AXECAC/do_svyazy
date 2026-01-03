@@ -19,9 +19,7 @@ pub fn Button(
     };
 
     view! {
-        <button
-            class=format!("{} {}", class_name, style::button)
-            on:click=click_handler>
+        <button class=format!("{} {}", class_name, style::button) on:click=click_handler>
             {children()}
         </button>
     }

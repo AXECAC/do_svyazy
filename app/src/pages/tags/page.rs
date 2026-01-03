@@ -1,38 +1,14 @@
-use std::collections::HashSet;
-use std::rc::Rc;
-use leptos::ev::MouseEvent;
 use leptos::server::codee::string::FromToStringCodec;
 use leptos::{html::*, prelude::*};
 use leptos_use::use_cookie;
 use share::Tags;
+use std::collections::HashSet;
+use std::rc::Rc;
 
 use crate::components::button::component::Button;
 use crate::components::button::component::ButtonProps;
+use crate::components::tag::component::Tag;
 use crate::pages::tags::handlers::{handle_get_tags, handle_set_tags};
-
-#[component]
-fn Tag(tag: Tags, selected_tags: RwSignal<HashSet<i32>>) -> impl IntoView {
-    let is_checked = move || selected_tags.get().contains(&tag.id);
-
-    let on_click = move |_: MouseEvent| {
-        let mut set = selected_tags.get();
-        if set.contains(&tag.id) {
-            set.remove(&tag.id);
-        } else {
-            set.insert(tag.id);
-        }
-        selected_tags.set(set);
-    };
-
-    view! {
-        <div style="">
-            <label>
-                {tag.name.clone()}
-                <input type="checkbox" name="tags" prop:checked=is_checked() on:click=on_click />
-            </label>
-        </div>
-    }
-}
 
 fn get_token(token_s: WriteSignal<String>) {
     Effect::new(move |_| {
