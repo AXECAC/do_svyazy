@@ -11,7 +11,6 @@ use crate::pages::{
     register::page::RegisterPage, tags::page::TagsPage,
 };
 
-mod api;
 mod components;
 mod pages;
 
@@ -39,6 +38,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
+    let conf = get_configuration(None).unwrap();
+    provide_context(conf);
 
     view! {
         <Stylesheet id="leptos" href="/pkg/do_svyazy.css" />
