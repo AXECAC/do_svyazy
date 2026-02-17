@@ -3,10 +3,16 @@ CREATE TABLE "users" (
 		START WITH 1
 		INCREMENT BY 1
 	) PRIMARY KEY,
-  "username" varchar,
+  "name" varchar,
+  "role" varchar,
   "email" varchar,
   "bio" text,
   "password_hash" varchar
+);
+
+CREATE TABLE "refresh_tokens"(
+  "user_id" INT NOT NULL,
+  "token" text NOT NULL
 );
 
 CREATE TABLE "posts" (
@@ -78,6 +84,8 @@ CREATE TABLE "community_tags" (
 );
 
 COMMENT ON COLUMN "posts"."body" IS 'Content of the post';
+
+ALTER TABLE "refresh_tokens" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "posts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 

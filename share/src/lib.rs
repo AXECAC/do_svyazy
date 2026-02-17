@@ -8,7 +8,7 @@ pub struct LoginUser{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegisterUser {
-    pub username: String,
+    pub name: String,
     pub email: String,
     pub password: String,
 }
@@ -23,7 +23,13 @@ pub struct Tags {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FrontUser {
     pub id: i32,
-    pub username: String,
+    pub name: String,
     pub email: String,
     pub bio: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Tokens {
+    pub access_token: String,
+    pub refresh_token: String,
 }

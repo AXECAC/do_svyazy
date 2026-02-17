@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 app = { path = "../app", default-features = false, features = ["ssr"] }
 share = { path = "../share" }
-leptos = { workspace = true, features = [ "ssr" ]}
+leptos = { workspace = true, features = [ "ssr" ] }
 leptos_axum.workspace = true
 
 axum.workspace = true
@@ -21,3 +21,6 @@ sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio"] }
 sha2 = "0.10.9"
 hex = "0.4.3"
 serde = "1.0.228"
+jsonwebtoken = { version = "10.2.0", features = ["aws_lc_rs"] }
+uuid = "1.19.0"
+thiserror = "2.0.17"

@@ -15,8 +15,11 @@ use server::handlers::set_base_tags;
 use tower_http::cors::{Any, CorsLayer};
 
 mod config;
+mod middlewares;
+mod services;
 
 use crate::config::*;
+
 #[tokio::main]
 async fn main() {
     let config = Config::from_env();

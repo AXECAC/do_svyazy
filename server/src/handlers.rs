@@ -20,8 +20,8 @@ pub async fn register(
     let password_hash = hash_password(&user_data.password);
 
     let _user = sqlx::query!(
-        "INSERT INTO users (username, email, bio, password_hash) VALUES ($1, $2, $3, $4);",
-        user_data.username,
+        "INSERT INTO users (name, email, bio, password_hash) VALUES ($1, $2, $3, $4);",
+        user_data.name,
         user_data.email,
         " ",
         password_hash
@@ -106,7 +106,7 @@ pub async fn set_base_tags(
 }
 
 pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoResponse, String> {
-    let get_users = sqlx::query!("SELECT id, username FROM users;")
+    let get_users = sqlx::query!("SELECT id, name, role FROM users;")
         .fetch_all(&pool)
         .await
         .map_err(|e| e.to_string())?;
@@ -115,7 +115,8 @@ pub async fn get_all_people(State(pool): State<PgPool>) -> Result<impl IntoRespo
         .into_iter()
         .map(|record| User {
             id: record.id,
-            username: record.username.unwrap(),
+            name: record.name.unwrap(),
+            role: record.role.unwrap(),
             email: String::new(),
             bio: String::new(),
             password_hash: String::new(),
@@ -131,10 +132,10 @@ pub async fn get_people_by_name(
 ) -> Result<impl IntoResponse, String> {
     let mut search_by_email = String::from("%");
     search_by_email.push_str(&email);
-    search_by_email.push_str("%");
+    search_by_email.push('%');
 
     let get_users = sqlx::query!(
-        "SELECT id, username FROM users WHERE email ILIKE $1;",
+        "SELECT id, name, role FROM users WHERE email ILIKE $1;",
         search_by_email
     )
     .fetch_all(&pool)
@@ -145,7 +146,8 @@ pub async fn get_people_by_name(
         .into_iter()
         .map(|record| User {
             id: record.id,
-            username: record.username.unwrap(),
+            name: record.name.unwrap(),
+            role: record.role.unwrap(),
             email: String::new(),
             bio: String::new(),
             password_hash: String::new(),
@@ -211,7 +213,7 @@ pub async fn get_friends(
 
     // Запрос для получения данных по списку id друзей
     let friends_data = sqlx::query!(
-        "SELECT id, username, email, bio FROM users WHERE id = ANY($1)",
+        "SELECT id, name, email, bio FROM users WHERE id = ANY($1)",
         &friend_ids_vec
     )
     .fetch_all(&pool)
@@ -225,7 +227,7 @@ pub async fn get_friends(
                 .iter()
                 .map(|data| FrontUser {
                     id: data.id,
-                    username: data.username.clone().unwrap(),
+                    name: data.name.clone().unwrap(),
                     email: data.email.clone().unwrap(),
                     bio: data.bio.clone().unwrap(),
                 })

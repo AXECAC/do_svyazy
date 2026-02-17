@@ -34,7 +34,7 @@ pub fn RegisterPage() -> impl IntoView {
     let on_register_click = Rc::new({
         move |_| {
             let user = RegisterUser {
-                username: phio.get(),
+                name: phio.get(),
                 email: email.get(),
                 password: password.get(),
             };
